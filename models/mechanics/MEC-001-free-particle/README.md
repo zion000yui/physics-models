@@ -14,7 +14,9 @@ model.py	引擎无关：动力学方程 dynamics + 解析解 analytical
 scipy_solve.py	用 SciPy solve_ivp 做数值积分并打印误差
 test_consistency.py	数值解 vs 解析解一致性测试
 运行
-
+bash
+python scipy_solve.py
+python test_consistency.py
 依赖
 numpy
 scipy
