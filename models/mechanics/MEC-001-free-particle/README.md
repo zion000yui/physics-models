@@ -93,3 +93,40 @@ python test_consistency.py
 
 - numpy
 - scipy
+
+
+## 数值验证
+
+使用 SciPy `solve_ivp` 进行数值积分。
+
+初始条件：
+
+$$
+x_0=0,\qquad v_0=2
+$$
+
+在 $t=10$ 时：
+
+$$
+x_{\mathrm{numerical}}=20
+$$
+
+$$
+x_{\mathrm{analytical}}=20
+$$
+
+最大位置误差：
+
+$$
+3.553\times10^{-15}
+$$
+
+最大速度误差：
+
+$$
+0
+$$
+
+验证结果：
+
+`OK: MEC-001 数值解与解析解一致`
