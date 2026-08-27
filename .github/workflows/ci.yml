@@ -14,7 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        model: [MEC-001-free-particle, MEC-002-forced-particle]
+        include:
+          - model: MEC-001-free-particle
+            test: test_MEC001_consistency.py
+          - model: MEC-002-forced-particle
+            test: test_MEC002_consistency.py
 
     steps:
       - uses: actions/checkout@v4
@@ -32,4 +36,4 @@ jobs:
       - name: Run consistency test for ${{ matrix.model }}
         run: |
           cd models/mechanics/${{ matrix.model }}
-          python test_consistency.py
+          python ${{ matrix.test }}
