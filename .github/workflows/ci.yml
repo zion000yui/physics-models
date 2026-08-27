@@ -25,6 +25,8 @@ jobs:
             test: test_MEC004_consistency.py
           - model: MEC-005-nonuniform-circular-motion
             test: test_MEC005_consistency.py
+          - model: MEC-006-central-force-hooke
+            test: test_MEC006_consistency.py
 
     steps:
       - uses: actions/checkout@v5
