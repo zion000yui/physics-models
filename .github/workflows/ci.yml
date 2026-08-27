@@ -23,6 +23,8 @@ jobs:
             test: test_MEC003_consistency.py
           - model: MEC-004-uniform-circular-motion
             test: test_MEC004_consistency.py
+          - model: MEC-005-nonuniform-circular-motion
+            test: test_MEC005_consistency.py
 
     steps:
       - uses: actions/checkout@v5
