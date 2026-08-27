@@ -19,6 +19,10 @@ jobs:
             test: test_MEC001_consistency.py
           - model: MEC-002-forced-particle
             test: test_MEC002_consistency.py
+          - model: MEC-003-projectile
+            test: test_MEC003_consistency.py
+          - model: MEC-004-uniform-circular-motion
+            test: test_MEC004_consistency.py
 
     steps:
       - uses: actions/checkout@v5
