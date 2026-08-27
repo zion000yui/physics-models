@@ -1,0 +1,35 @@
+name: Physics Models CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # 每天 00:00 UTC（北京时间 08:00）自动跑一次
+    - cron: '0 0 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        model: [MEC-001-free-particle, MEC-002-forced-particle]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy
+
+      - name: Run consistency test for ${{ matrix.model }}
+        run: |
+          cd models/mechanics/${{ matrix.model }}
+          python test_consistency.py
