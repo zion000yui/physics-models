@@ -7,7 +7,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from model import analytical, dynamics, validate_initial_state
+from model import analytical, dynamics, validate_parameters
 
 
 def simulate(x0=1.0, y0=0.0, vx0=0.0, vy0=1.0, k=1.0, m=1.0,
@@ -34,7 +34,7 @@ def simulate(x0=1.0, y0=0.0, vx0=0.0, vy0=1.0, k=1.0, m=1.0,
     (t, x, y, vx, vy) : (np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray)
     """
     initial_state = np.array([x0, y0, vx0, vy0], dtype=float)
-    validate_initial_state(k=k, m=m)
+    validate_parameters(k=k, m=m)
 
     t_eval = np.linspace(0.0, t_end, n_points)
 

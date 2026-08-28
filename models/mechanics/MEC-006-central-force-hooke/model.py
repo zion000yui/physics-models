@@ -55,7 +55,7 @@ F = -k·r 作用下运动，轨迹通常为椭圆。这是系列第一次引入�
 import numpy as np
 
 
-def validate_initial_state(k=1.0, m=1.0):
+def validate_parameters(k=1.0, m=1.0):
     """验证基本物理参数合法性。
 
     参数
