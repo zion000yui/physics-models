@@ -102,6 +102,87 @@ def test_trajectory_centrally_symmetric():
                 f"y 不对称：t={t[i]:.3f}，y={y_num[i]:.6f}，-y(t+T/2)={-y_num[j]:.6f}"
 
 
+def _ellipse_axes_from_L_E(L, E, k, m):
+    """从角动量 L 和机械能 E 反推椭圆半长轴 a、半短轴 b。
+
+    推导：
+        机械能 E = ½m(v²) + ½k(r²)
+        角动量 L = m(x·vy - y·vx)
+        对胡克型中心力场，轨迹为椭圆，可证明：
+            E = ½k(a² + b²)
+            L² = k·m·a²·b²
+        其中 a ≥ b > 0 为半长轴、半短轴。
+
+        令 u = a², v = b²，则：
+            u + v = 2E/k
+            uv = L²/(k·m)
+        解得：
+            a² = E/k + √(E²/k² - L²/(k·m))
+            b² = E/k - √(E²/k² - L²/(k·m))
+    """
+    L_sq = L ** 2
+    discriminant = (E / k) ** 2 - L_sq / (k * m)
+    discriminant = max(discriminant, 0.0)
+    a_sq = E / k + np.sqrt(discriminant)
+    b_sq = E / k - np.sqrt(discriminant)
+    a = np.sqrt(max(a_sq, 0.0))
+    b = np.sqrt(max(b_sq, 0.0))
+    return a, b
+
+
+def _ellipse_quadratic_form(x0, y0, vx0, vy0, omega0):
+    """从初始条件构造椭圆二次型矩阵 Q = M·Mᵀ。
+
+    轨迹参数化：r(t) = M·[cos(ω₀t); sin(ω₀t)]，
+    其中 M = [[x₀, vx₀/ω₀], [y₀, vy₀/ω₀]]。
+    椭圆方程为 rᵀ·Q⁻¹·r = 1，Q = M·Mᵀ。
+    """
+    M = np.array([[x0, vx0 / omega0],
+                  [y0, vy0 / omega0]])
+    Q = M @ M.T
+    return Q
+
+
+def test_trajectory_is_ellipse():
+    """验证轨迹确实是椭圆，且半长轴 a、半短轴 b 与 L、E 反推值一致。
+
+    方法：
+    1. 从 L、E 反推 a, b
+    2. 从初始条件构造椭圆二次型矩阵 Q = M·Mᵀ
+    3. 验证 Q 的特征值为 a²、b²
+    4. 验证数值轨迹上的点满足 rᵀ·Q⁻¹·r ≈ 1
+
+    主轴方向说明：
+        由于 M 的列向量本身就是沿椭圆主轴方向的参数化基，
+        Q = M·Mᵀ 直接给出了主轴坐标下的二次型，无需额外旋转提取主轴。
+    """
+    x0, y0, vx0, vy0, k, m = 2.0, 1.0, -0.5, 3.0, 2.0, 1.5
+    omega0 = np.sqrt(k / m)
+    t_end, n = 4.0, 401
+    t, x_num, y_num, vx_num, vy_num = _solve(
+        x0, y0, vx0, vy0, k=k, m=m, t_end=t_end, n=n)
+
+    # 守恒量
+    L0 = angular_momentum([x0, y0, vx0, vy0], m=m)
+    E0 = mechanical_energy([x0, y0, vx0, vy0], k=k, m=m)
+
+    # 反推 a, b
+    a, b = _ellipse_axes_from_L_E(L0, E0, k, m)
+    assert a >= b >= 0, f"半轴不合法：a={a:.6f}, b={b:.6f}"
+
+    # 椭圆二次型矩阵
+    Q = _ellipse_quadratic_form(x0, y0, vx0, vy0, omega0)
+    eigvals = np.sort(np.linalg.eigvalsh(Q))
+    assert np.allclose(eigvals, [b**2, a**2], atol=1e-4),         f"椭圆矩阵特征值不符：{eigvals}，理论 [{b**2:.6f}, {a**2:.6f}]"
+
+    # 验证轨迹点满足椭圆方程
+    Q_inv = np.linalg.inv(Q)
+    for i in range(0, len(t), 40):
+        r = np.array([x_num[i], y_num[i]])
+        val = r @ Q_inv @ r
+        assert np.allclose(val, 1.0, atol=1e-4),             f"点不在椭圆上：t={t[i]:.3f}，rᵀQ⁻¹r={val:.6f}"
+
+
 def test_circular_orbit_degeneracy():
     """当初始条件满足圆轨道条件时，轨迹应退化为圆（定性验证）。"""
     # 圆轨道条件：|r0| 恒定、v0⊥r0、|v0| = ω0·|r0|
