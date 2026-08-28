@@ -136,3 +136,59 @@ python -m pytest models/mechanics/ --tb=short -q
 - numpy
 - scipy
 - pytest（可选，用于 pytest 模式）
+
+---
+
+## Model Registry (v1.1)
+
+v1.1 新增了 Model Registry，使程序可以发现、查询和动态加载 38 个 MEC 模型。
+
+### 快速使用
+
+```python
+from registry import ModelRegistry
+
+reg = ModelRegistry()
+
+# 列出全部模型
+reg.list_models()                          # → ['MEC-001', ..., 'MEC-100']
+
+# 按分类查询
+reg.list_models(category="oscillatory-systems")  # → ['MEC-010', ..., 'MEC-015']
+reg.list_categories()                       # → 10 个分类
+
+# 查询单个模型元数据
+info = reg.get_model_info("MEC-050")
+info.has_dynamics                          # → True
+info.dynamics_fn                            # → 'modal_dynamics'
+info.state_dim                              # → 'variable'
+
+# 判断接口是否存在
+reg.has_interface("MEC-053", "dynamics")  # → False
+
+# 动态加载模型（返回原始 Python module）
+model = reg.get_model("MEC-010")
+result = model.dynamics(0.0, [1.0, 0.0], k=4.0, m=1.0)
+
+# 动态加载 scipy_solve
+solver = reg.get_scipy_solve("MEC-001")
+
+# 按属性搜索
+reg.search(has_dynamics=True, has_energy=True)  # → 27 个模型
+```
+
+### 新增文件
+
+| 文件 | 说明 |
+|---|---|
+| `registry/__init__.py` | 导出 `ModelRegistry` 和 `ModelEntry` |
+| `registry/registry.py` | `ModelRegistry` 类实现 |
+| `registry/catalog.json` | 机器可读的 38 个模型元数据清单 |
+| `test_registry.py` | Registry 测试（17 个测试） |
+
+### 设计原则
+
+- **零侵入**：不修改任何现有 `model.py`、`scipy_solve.py`、测试文件
+- **无代理**：`get_model()` 返回原始 Python module，不创建 wrapper/adapter
+- **模块隔离**：使用独立模块名（如 `physics_models_mec_010_model`）避免 `sys.modules['model']` 冲突
+- **元数据驱动**：所有模型信息来自 `catalog.json`，与实际代码一致
