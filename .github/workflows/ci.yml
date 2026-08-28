@@ -12,64 +12,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - model: MEC-001-free-particle
-            test: test_MEC001_consistency.py
-          - model: MEC-002-forced-particle
-            test: test_MEC002_consistency.py
-          - model: MEC-003-projectile
-            test: test_MEC003_consistency.py
-          - model: MEC-004-uniform-circular-motion
-            test: test_MEC004_consistency.py
-          - model: MEC-005-nonuniform-circular-motion
-            test: test_MEC005_consistency.py
-          - model: MEC-006-central-force-hooke
-            test: test_MEC006_consistency.py
-          - model: MEC-007-central-force-gravity
-            test: test_MEC007_consistency.py
-          - model: MEC-008-two-body-problem
-            test: test_MEC008_consistency.py
-          - model: MEC-009-particle-with-drag
-            test: test_MEC009_consistency.py
-          - model: MEC-010-mass-spring
-            test: test_MEC010_consistency.py
-          - model: MEC-011-damped-oscillator
-            test: test_MEC011_consistency.py
-          - model: MEC-012-forced-oscillator
-            test: test_MEC012_consistency.py
-          - model: MEC-014-coupled-oscillators
-            test: test_MEC014_consistency.py
-          - model: MEC-015-nonlinear-pendulum
-            test: test_MEC015_consistency.py
-          - model: MEC-013-double-pendulum
-            test: test_MEC013_consistency.py
-          - model: MEC-020-rigid-translation
-            test: test_MEC020_consistency.py
-          - model: MEC-021-rigid-rotation
-            test: test_MEC021_consistency.py
-          - model: MEC-024-rolling-without-slipping
-            test: test_MEC024_consistency.py
-          - model: MEC-022-planar-rigid-body
-            test: test_MEC022_consistency.py
-          - model: MEC-023-gyroscopic-precession
-            test: test_MEC023_consistency.py
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install numpy scipy
+          pip install numpy scipy pytest
 
-      - name: Run consistency test for ${{ matrix.model }}
+      - name: Run all model tests
         run: |
-          cd models/mechanics/${{ matrix.model }}
-          python ${{ matrix.test }}
+          python run_all_tests.py

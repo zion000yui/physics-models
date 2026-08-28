@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -21,8 +20,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install numpy scipy matplotlib pytest
+        pip install numpy scipy pytest
 
-    - name: Run tests
+    - name: Run tests (pytest with conftest isolation)
       run: |
-        pytest
+        python -m pytest models/mechanics/ --tb=short -q
